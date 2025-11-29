@@ -1,10 +1,7 @@
-// Sources/MagellanoCore/Training/ModelBackward.swift
 import Foundation
 import Metal
 
 extension MambaMoEModel {
-    
-    /// Full backward pass computing gradients for all LoRA layers
     public func backwardLoRA(
         gradOutput: Tensor,
         loraLayers: [String: LoRALayer],
@@ -12,43 +9,41 @@ extension MambaMoEModel {
         backward: LoRABackward
     ) async throws -> [String: (gradA: Tensor, gradB: Tensor)] {
         
+        // Backward through lmHead: gradLogits [B,L,V] → gradHidden [B,L,D]
+        let gradHidden = try backwardLMHead(gradLogits: gradOutput)
+        
         var allGradients: [String: (gradA: Tensor, gradB: Tensor)] = [:]
         
-        // Backward through each layer with LoRA
-        for (idx, _) in layers.enumerated().reversed() {
-            let layerName = "layer\(idx)"
+        for (name, lora) in loraLayers {
+            guard let input = cache.get(name: "\(name).pre") else { continue }
             
-            // Output projection LoRA
-            if let lora = loraLayers["\(layerName).outProj"],
-               let input = cache.get(name: "\(layerName).outProj.pre") {
-                
-                if let (gradA, gradB) = backward.backward(
-                    gradOutput: gradOutput,
-                    input: input,
-                    matrixA: lora.matrixA,
-                    matrixB: lora.matrixB,
-                    scaling: lora.config.scaling
-                ) {
-                    allGradients["\(layerName).outProj"] = (gradA, gradB)
-                }
-            }
-            
-            // Router LoRA
-            if let lora = loraLayers["\(layerName).router"],
-               let input = cache.get(name: "\(layerName).router.pre") {
-                
-                if let (gradA, gradB) = backward.backward(
-                    gradOutput: gradOutput,
-                    input: input,
-                    matrixA: lora.matrixA,
-                    matrixB: lora.matrixB,
-                    scaling: lora.config.scaling
-                ) {
-                    allGradients["\(layerName).router"] = (gradA, gradB)
-                }
+            if let (gradA, gradB) = backward.backward(
+                gradOutput: gradHidden,
+                input: input,
+                matrixA: lora.matrixA,
+                matrixB: lora.matrixB,
+                scaling: lora.config.scaling
+            ) {
+                allGradients[name] = (gradA, gradB)
             }
         }
         
         return allGradients
+    }
+    
+    private func backwardLMHead(gradLogits: Tensor) throws -> Tensor {
+        // lmHead = tied embedding [V, D]
+        // Forward: hidden [B,L,D] @ lmHead.T [D,V] → logits [B,L,V]
+        // Backward: gradLogits [B,L,V] @ lmHead [V,D] → gradHidden [B,L,D]
+        
+        let B = gradLogits.shape[0], L = gradLogits.shape[1]
+        
+        guard let gradFlat = gradLogits.reshape([B*L, config.vocabSize]),
+              let gradHiddenFlat = Tensor.matmul(device: device, a: gradFlat, b: tokenEmbedding),
+              let gradHidden = gradHiddenFlat.reshape([B, L, config.dModel]) else {
+            throw TensorError.operationFailed("LM head backward failed")
+        }
+        
+        return gradHidden
     }
 }
