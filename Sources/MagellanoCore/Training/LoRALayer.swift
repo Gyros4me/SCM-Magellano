@@ -26,7 +26,7 @@ public struct LoRAConfig: Codable, Sendable {
 
 public final class LoRALayer: @unchecked Sendable {
     private let device: MTLDevice
-    private let config: LoRAConfig
+    public let config: LoRAConfig
     
     // Low-rank matrices (trainable)
     public let A: Tensor  // [inDim, rank] - FP16
@@ -97,7 +97,7 @@ public enum LoRAError: Error {
 
 // Tensor extensions for LoRA ops
 extension Tensor {
-    func scale(_ factor: Float) -> Tensor? {
+    public func scale(_ factor: Float) -> Tensor? {
         guard let result = Tensor.zeros(device: self.buffer.device, shape: self.shape, category: .temporary) else {
             return nil
         }

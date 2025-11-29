@@ -62,9 +62,9 @@ kernel void selective_scan_optimized_v2(
 
 public final class MambaMoEModel: @unchecked Sendable {
     internal let config: ModelConfig
-    private let device: MTLDevice
+    internal let device: MTLDevice
     internal let tokenEmbedding: Tensor
-    internal var layers: [any ModelLayer] = []
+    public var layers: [any ModelLayer] = []
     private let lmHead: Tensor
     
     public init?(device: MTLDevice, config: ModelConfig) async {
@@ -135,6 +135,6 @@ public final class MambaMoEModel: @unchecked Sendable {
     }
 }
 
-protocol ModelLayer {}
+public protocol ModelLayer {}
 extension MambaLayer: ModelLayer {}
 extension MoELayer: ModelLayer {}
