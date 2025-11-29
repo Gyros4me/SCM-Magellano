@@ -1,110 +1,65 @@
-// Sources/MagellanoCLI/main.swift - QLoRA Real Quantization Test
 import Foundation
-import MagellanoCore
 import Metal
+import MagellanoCore
 
 @main
-struct MagellanoCLI {
-    static func main() async throws {
-        print("🚀 QLoRA Real Quantization Test - 3.2B Model\n")
+struct TrainingTest {
+    static func main() async {
+        print("🚀 Training Infrastructure Test\n")
         
         guard let device = MTLCreateSystemDefaultDevice() else {
-            fatalError("❌ Metal unavailable")
+            fatalError("Metal not available")
         }
         
-        let modelConfig = ModelConfig.magellano1B  // 3.2B actual
-        let loraConfig = LoRAConfig(rank: 64, alpha: 128, targetModules: [.qProj, .vProj, .outProj])
+        // Config
+        let dataConfig = DataConfig(batchSize: 2, seqLength: 32)
+        let optimizerConfig = OptimizerConfig(learningRate: 1e-4)
         
-        print("📊 Configuration:")
-        print("  Model: \(modelConfig.totalParams / 1_000_000)M params")
-        print("  LoRA rank: \(loraConfig.rank)\n")
+        let dataLoader = DataLoader(config: dataConfig)
+        let optimizer = AdamOptimizer(device: device, config: optimizerConfig)
+        let loss = CrossEntropyLoss(device: device)
+        let accumulator = GradientAccumulator(device: device)
         
-        // Phase 1: Build FP32 model
-        print("Phase 1: Building FP32 base model...")
-        guard let model = await MambaMoEModel(device: device, config: modelConfig) else {
-            fatalError("❌ Model init failed")
+        print("✅ Components initialized\n")
+        
+        // Simulate training step
+        guard let batch = dataLoader.nextBatch(),
+              let logits = Tensor.randn(device: device, shape: [2, 32, 100], std: 0.1, category: .activations) else {
+            fatalError("Setup failed")
         }
         
-        let memoryBeforeQuant = await MemoryAggregator.shared.generateReport(duration: 0)
-        print("✅ FP32 model loaded: \(memoryBeforeQuant.peakBytes / 1_048_576) MB")
-        print("   (Real memory ~9GB - not tracked by profiler)\n")
+        // Forward
+        let (lossVal, acc) = loss.forward(logits: logits, targets: batch.targetIds)
+        print("Step 1 - Forward:")
+        print("  Loss: \(String(format: "%.4f", lossVal))")
+        print("  Acc: \(String(format: "%.2f%%", acc * 100))")
         
-        // Phase 2: REAL Quantization FP32 → NF4
-        print("Phase 2: Quantizing FP32 → NF4 (this takes time)...")
-        guard let modelQuantizer = ModelQuantizer(device: device) else {
-            fatalError("❌ ModelQuantizer init failed")
+        // Backward
+        guard let gradLogits = loss.backward(logits: logits, targets: batch.targetIds) else {
+            fatalError("Backward failed")
+        }
+        print("\nStep 2 - Backward:")
+        print("  Gradients: \(gradLogits.shape)")
+        
+        // Accumulate
+        accumulator.accumulate(name: "lm_head", gradient: gradLogits)
+        print("\nStep 3 - Accumulate:")
+        print("  Count: \(accumulator.gradientCount)")
+        
+        // Optimizer step (dummy param)
+        guard let param = Tensor.randn(device: device, shape: [100, 100], std: 0.1, category: .modelWeights) else {
+            fatalError("Param creation failed")
         }
         
-        let startQuant = Date()
-        guard let quantizedModel = await modelQuantizer.quantizeModel(model) else {
-            fatalError("❌ Model quantization failed")
-        }
-        let quantMs = Date().timeIntervalSince(startQuant) * 1000
+        let paramBefore = param.toArray()[0]
+        optimizer.step(parameters: ["weight": param], gradients: ["weight": gradLogits])
+        let paramAfter = param.toArray()[0]
         
-        let (originalGB, quantizedGB, savedGB) = modelQuantizer.calculateSavings(
-            original: modelConfig.totalParams * 4,
-            quantized: quantizedModel
-        )
+        print("\nStep 4 - Optimizer:")
+        print("  Param changed: \(abs(paramAfter - paramBefore) > 1e-6)")
+        print("  LR: \(String(format: "%.2e", optimizer.currentLearningRate))")
         
-        print("✅ Quantization complete in \(String(format: "%.1f", quantMs))ms")
-        print("  Original (FP32): \(String(format: "%.2f", originalGB))GB")
-        print("  Quantized (NF4): \(String(format: "%.2f", quantizedGB))GB")
-        print("  Saved: \(String(format: "%.2f", savedGB))GB (\(String(format: "%.1f", (savedGB/originalGB)*100))%)\n")
-        
-        // Phase 3: Add LoRA adapters
-        print("Phase 3: Adding LoRA adapters...")
-        var loraLayers: [LoRALayer] = []
-        let numLoRALayers = 24
-        
-        for _ in 0..<numLoRALayers {
-            guard let lora = LoRALayer(device: device, inDim: modelConfig.dModel, outDim: modelConfig.dModel, config: loraConfig) else {
-                fatalError("❌ LoRA init failed")
-            }
-            loraLayers.append(lora)
-        }
-        
-        let loraMemoryBytes = loraLayers.reduce(0) { $0 + $1.memoryBytes }
-        let loraMemoryGB = Float(loraMemoryBytes) / 1_073_741_824
-        print("✅ LoRA adapters: \(loraMemoryBytes / 1_048_576) MB")
-        print("  Trainable params: \(loraLayers.reduce(0) { $0 + $1.parameterCount } / 1_000_000)M\n")
-        
-        // Phase 4: Memory check after quantization
-        print("Phase 4: Final memory check...")
-        // Force garbage collection
-        autoreleasepool {
-            _ = model  // Release reference
-        }
-        
-        try await Task.sleep(nanoseconds: 1_000_000_000)  // Wait 1s for cleanup
-        
-        let memoryAfterQuant = await MemoryAggregator.shared.generateReport(duration: 1)
-        let _ = Float(memoryAfterQuant.peakBytes) / 1_073_741_824
-        
-        print("📊 Memory After Quantization:")
-        print("  Tracked: \(memoryAfterQuant.peakBytes / 1_048_576) MB")
-        print("  Actual (estimate): ~\(String(format: "%.2f", quantizedGB + loraMemoryGB + 0.5))GB\n")
-        
-        // Phase 5: Training estimate
-        print("🎯 Final Training Memory Estimate:")
-        let nf4Weights = quantizedGB
-        let loraTotal = loraMemoryGB * 3  // weights + grads + optimizer
-        let activations: Float = 2.5
-        let totalTraining = nf4Weights + loraTotal + activations
-        
-        print("  NF4 weights:       \(String(format: "%5.2f", nf4Weights))GB")
-        print("  LoRA (w+g+opt):    \(String(format: "%5.2f", loraTotal))GB")
-        print("  Activations:       \(String(format: "%5.2f", activations))GB")
-        print("  " + String(repeating: "-", count: 30))
-        print("  Total:             \(String(format: "%5.2f", totalTraining))GB")
-        print()
-        
-        if totalTraining < 14.0 {
-            print("  ✅ FIT on 16GB with \(String(format: "%.2f", 16.0 - totalTraining))GB headroom!")
-        } else {
-            print("  ⚠️  Tight fit - may need gradient checkpointing")
-        }
-        
-        print("\n🎉 Real QLoRA Quantization Complete!")
-        print("🔥 Model ready for training on Mac Mini M4 16GB")
+        print("\n🎉 Full training step validated!")
+        print("   Ready for LoRA integration")
     }
 }

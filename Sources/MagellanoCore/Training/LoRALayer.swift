@@ -113,3 +113,19 @@ extension Tensor {
     }
     
 }
+
+
+// Public accessors for training
+extension LoRALayer {
+    public var matrixA: Tensor {
+        A
+    }
+    
+    public var matrixB: Tensor {
+        B
+    }
+    
+    public var trainableParameters: Int {
+        parameterCount
+    }
+}
