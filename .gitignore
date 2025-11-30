@@ -6,3 +6,10 @@ DerivedData/
 .swiftpm/
 *.resolved
 *.log
+*.log
+*.csv
+.DS_Store
+project_structure.txt
+count_params.swift
+fixes.swift
+*.sh
