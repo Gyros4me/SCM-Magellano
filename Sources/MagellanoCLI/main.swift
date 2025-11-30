@@ -27,7 +27,6 @@ struct ProductionDemo {
         Swift.print("   Total layers: \(model.layers.count)")
         Swift.print("   Memory allocated\n")
         
-        // LoRA setup
         Swift.print("🔧 Setting up QLoRA (NF4 quantization)...")
         let loraConfig = LoRAConfig(rank: 64, alpha: 128)
         var loraLayers: [String: LoRALayer] = [:]
@@ -41,7 +40,6 @@ struct ProductionDemo {
         Swift.print("\n✅ QLoRA adapters ready")
         Swift.print("   Trainable params: ~\(config.totalParams / 20 / 1_000_000)M (5%)")
         Swift.print("   Memory saved: ~6.4GB vs full fine-tune\n")
-        
         Swift.print("🎯 System ready for training on M4 16GB")
     }
 }
