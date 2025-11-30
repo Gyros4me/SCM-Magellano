@@ -24,6 +24,7 @@ public final class AdamOptimizer: @unchecked Sendable {
     private let device: MTLDevice
     private let config: OptimizerConfig
     
+    private var currentLR: Float
     // Optimizer states
     private var momentum: [String: Tensor] = [:]     // First moment
     private var variance: [String: Tensor] = [:]     // Second moment
@@ -32,9 +33,14 @@ public final class AdamOptimizer: @unchecked Sendable {
     public init(device: MTLDevice, config: OptimizerConfig) {
         self.device = device
         self.config = config
+        self.currentLR = config.learningRate
     }
     
     // Update parameters
+
+    public func updateLearningRate(_ newLR: Float) {
+        currentLR = newLR
+    }
     public func step(parameters: [String: Tensor], gradients: [String: Tensor]) {
         step += 1
         
