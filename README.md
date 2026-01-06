@@ -1,10 +1,13 @@
 # 🧭 SCM Magellano
 
 **3.3B Mamba-MoE Small Concept Model on Apple Silicon M4 16GB**
+[![Swift 6.2.3](https://img.shields.io/badge/Swift-6.2.3-orange.svg)](https://swift.org)
 
-[![Swift 6.0](https://img.shields.io/badge/Swift-6.2.1-orange.svg)](https://swift.org)
-[![Metal](https://img.shields.io/badge/Metal-Accelerated-blue.svg)](https://developer.apple.com/metal/)
+[![Metal 4.1+](https://img.shields.io/badge/Metal-4.1%2B-blue.svg)](https://developer.apple.com/metal/)
+
 [![Parameters](https://img.shields.io/badge/Parameters-3.3B-green.svg)]()
+
+[![macOS](https://img.shields.io/badge/macOS-26.2%20Tahoe-purple.svg)]()
 
 ## Achievement
 
