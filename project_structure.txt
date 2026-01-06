@@ -1,0 +1,149 @@
+SCMMagellano Project Structure
+Generated: dom 30 nov 2025 17:47:20 CET
+==========================================
+
+├── build_3.3B.log
+├── build_full.log
+├── build_max_verbose.log
+├── count_params.swift
+├── fixes.swift
+├── memory_test.csv
+├── Package.swift
+├── project_structure.txt
+├── project.sh
+├── README.md
+├── run_3.3B.log
+├── run_full.log
+├── run_verbose.log
+├── snapshot_v0.1.0.sh
+├── Sources
+│   ├── MagellanoCLI
+│   │   └── main.swift
+│   ├── MagellanoCore
+│   │   ├── Config
+│   │   │   └── ProductionConfig.swift
+│   │   ├── Core
+│   │   │   ├── MemoryProfiler.swift
+│   │   │   ├── Tensor.swift
+│   │   │   └── TensorExtensions.swift
+│   │   ├── Data
+│   │   │   └── DataLoader.swift
+│   │   ├── Kernels
+│   │   │   ├── ElementwiseKernels.metal
+│   │   │   ├── MoEKernels.swift
+│   │   │   ├── SelectiveScan.metal
+│   │   │   └── SelectiveScanKernel.swift
+│   │   ├── Logging
+│   │   │   ├── AnyCodable.swift
+│   │   │   ├── CheckpointData.swift
+│   │   │   ├── LogEntry.swift
+│   │   │   ├── LogLevel.swift
+│   │   │   └── StructuredLogger.swift
+│   │   ├── Memory
+│   │   │   ├── MemoryAggregator.swift
+│   │   │   ├── MemoryCollector.swift
+│   │   │   ├── MemorySnapshot.swift
+│   │   │   ├── MemoryTracker.swift
+│   │   │   └── TrackedBuffer.swift
+│   │   ├── Models
+│   │   │   ├── MambaLayer.swift
+│   │   │   ├── MambaMoEModel.swift
+│   │   │   ├── ModelConfig.swift
+│   │   │   ├── MoEConfig.swift
+│   │   │   ├── MoELayer.swift
+│   │   │   └── SSMConfig.swift
+│   │   ├── Quantization
+│   │   │   ├── ModelQuantizer.swift
+│   │   │   └── NF4Quantizer.swift
+│   │   ├── Resources
+│   │   │   └── NF4Kernels.metal
+│   │   ├── Training
+│   │   │   ├── GradientCheckpointing.swift
+│   │   │   ├── LoRABackward.swift
+│   │   │   ├── LoRALayer.swift
+│   │   │   ├── Loss.swift
+│   │   │   ├── LRScheduler.swift
+│   │   │   ├── ModelBackward.swift
+│   │   │   ├── ModelForward.swift
+│   │   │   ├── Optimizer.swift
+│   │   │   ├── TrainingLoop.swift
+│   │   │   └── TrainingMonitor.swift
+│   │   └── Utils
+│   │       └── DynamicMemoryManager.swift
+│   ├── MagellanoCoreML
+│   │       (empty)
+│   └── MagellanoMetal
+│       ├── Kernels
+│       │   └── MoE.metal
+│       └── MagellanoMetal.swift
+├── Tests
+│       (empty)
+└── verify_integration.sh
+
+📊 Swift Files Metrics:
+======================
+Total Swift Files: 43
+Total Lines of Code: 3902
+
+Breakdown by Directory:
+  10 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Training
+  6 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Models
+  5 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Memory
+  5 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Logging
+  3 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Core
+  3 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano
+  2 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Quantization
+  2 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Kernels
+  1 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoMetal
+  1 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Utils
+  1 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Data
+  1 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCore/Config
+  1 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/Sources/MagellanoCLI
+  1 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/.build/arm64-apple-macosx/release/MagellanoMetal.build/DerivedSources
+  1 files: /Volumes/Audio/masteraudio/Developer/SCMMagellano/.build/arm64-apple-macosx/release/MagellanoCore.build/DerivedSources
+
+📝 All Swift Files:
+===================
+  📄 .build/arm64-apple-macosx/release/MagellanoCore.build/DerivedSources/resource_bundle_accessor.swift (16 lines)
+  📄 .build/arm64-apple-macosx/release/MagellanoMetal.build/DerivedSources/resource_bundle_accessor.swift (16 lines)
+  📄 count_params.swift (34 lines)
+  📄 fixes.swift (28 lines)
+  📄 Package.swift (44 lines)
+  📄 Sources/MagellanoCLI/main.swift (45 lines)
+  📄 Sources/MagellanoCore/Config/ProductionConfig.swift (96 lines)
+  📄 Sources/MagellanoCore/Core/MemoryProfiler.swift (60 lines)
+  📄 Sources/MagellanoCore/Core/Tensor.swift (276 lines)
+  📄 Sources/MagellanoCore/Core/TensorExtensions.swift (28 lines)
+  📄 Sources/MagellanoCore/Data/DataLoader.swift (167 lines)
+  📄 Sources/MagellanoCore/Kernels/MoEKernels.swift (109 lines)
+  📄 Sources/MagellanoCore/Kernels/SelectiveScanKernel.swift (115 lines)
+  📄 Sources/MagellanoCore/Logging/AnyCodable.swift (46 lines)
+  📄 Sources/MagellanoCore/Logging/CheckpointData.swift (25 lines)
+  📄 Sources/MagellanoCore/Logging/LogEntry.swift (80 lines)
+  📄 Sources/MagellanoCore/Logging/LogLevel.swift (21 lines)
+  📄 Sources/MagellanoCore/Logging/StructuredLogger.swift (256 lines)
+  📄 Sources/MagellanoCore/Memory/MemoryAggregator.swift (115 lines)
+  📄 Sources/MagellanoCore/Memory/MemoryCollector.swift (49 lines)
+  📄 Sources/MagellanoCore/Memory/MemorySnapshot.swift (20 lines)
+  📄 Sources/MagellanoCore/Memory/MemoryTracker.swift (51 lines)
+  📄 Sources/MagellanoCore/Memory/TrackedBuffer.swift (29 lines)
+  📄 Sources/MagellanoCore/Models/MambaLayer.swift (147 lines)
+  📄 Sources/MagellanoCore/Models/MambaMoEModel.swift (140 lines)
+  📄 Sources/MagellanoCore/Models/ModelConfig.swift (34 lines)
+  📄 Sources/MagellanoCore/Models/MoEConfig.swift (49 lines)
+  📄 Sources/MagellanoCore/Models/MoELayer.swift (223 lines)
+  📄 Sources/MagellanoCore/Models/SSMConfig.swift (48 lines)
+  📄 Sources/MagellanoCore/Quantization/ModelQuantizer.swift (160 lines)
+  📄 Sources/MagellanoCore/Quantization/NF4Quantizer.swift (210 lines)
+  📄 Sources/MagellanoCore/Training/GradientCheckpointing.swift (92 lines)
+  📄 Sources/MagellanoCore/Training/LoRABackward.swift (151 lines)
+  📄 Sources/MagellanoCore/Training/LoRALayer.swift (131 lines)
+  📄 Sources/MagellanoCore/Training/Loss.swift (133 lines)
+  📄 Sources/MagellanoCore/Training/LRScheduler.swift (15 lines)
+  📄 Sources/MagellanoCore/Training/ModelBackward.swift (49 lines)
+  📄 Sources/MagellanoCore/Training/ModelForward.swift (57 lines)
+  📄 Sources/MagellanoCore/Training/Optimizer.swift (145 lines)
+  📄 Sources/MagellanoCore/Training/TrainingLoop.swift (339 lines)
+  📄 Sources/MagellanoCore/Training/TrainingMonitor.swift (24 lines)
+  📄 Sources/MagellanoCore/Utils/DynamicMemoryManager.swift (22 lines)
+  📄 Sources/MagellanoMetal/MagellanoMetal.swift (7 lines)
