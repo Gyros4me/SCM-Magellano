@@ -17,9 +17,12 @@ Build Time:     1.6s (release mode)
 Parameters:     3,284M (3.3B)
 Trainable:      164M (5% via QLoRA)
 Peak Memory:    10.6 GB / 16 GB
-Architecture:   30 Mamba + 9 MoE layers
+Architecture: Hybrid 39-Layer Stack
+              • 30 Mamba: O(n) temporal processing
+              • 9 MoE: 8 experts/layer, top-2 routing
 Vocabulary:     50,257 tokens (GPT-2 BPE)
-Context:        512 tokens
+Training Seq:    512 tokens (memory constraint)
+Inference Seq:   Unlimited (Mamba O(n) scaling)
 Optimizer:      AdamW Metal FP16 (8.81x speedup)
 ```
 
